@@ -1,5 +1,5 @@
-from django.test import LiveServerTestCase
 from selenium.webdriver.firefox.webdriver import WebDriver
+from django.test import LiveServerTestCase
 
 
 class IntegrationTests(LiveServerTestCase):

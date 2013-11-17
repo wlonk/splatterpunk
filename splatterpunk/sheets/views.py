@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import generics
 
-# Create your views here.
+from .models import Sheet
+
+
+class SheetView(generics.ListAPIView):
+    model = Sheet

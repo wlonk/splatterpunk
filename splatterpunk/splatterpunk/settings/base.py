@@ -69,6 +69,7 @@ DJANGO_APPS = (
 THIRD_PARTY_APPS = (
     'south',
     'django_nose',
+    'rest_framework',
 )
 
 LOCAL_APPS = (
