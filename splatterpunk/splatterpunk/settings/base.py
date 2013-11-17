@@ -51,7 +51,10 @@ TEMPLATE_DIRS = (
     root(PROJECT_NAME, "templates"),
 )
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '{project}.herokuapp.com'.format(project=PROJECT_NAME),
+    '{project}.herokuapp.com.'.format(project=PROJECT_NAME),
+]
 
 
 # Application definition
@@ -95,7 +98,7 @@ WSGI_APPLICATION = '{project}.wsgi.application'.format(project=PROJECT_NAME)
 
 DATABASES = {}
 DATABASES['default'] = dj_database_url.config(
-    default='postgres://localhost/splatterpunk'
+    default='postgres://localhost/{project}'.format(project=PROJECT_NAME)
 )
 
 # Internationalization
