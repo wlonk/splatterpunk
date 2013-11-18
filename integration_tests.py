@@ -1,11 +1,11 @@
-from selenium.webdriver.firefox.webdriver import WebDriver
+from selenium.webdriver import PhantomJS
 from django.test import LiveServerTestCase
 
 
 class IntegrationTests(LiveServerTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.selenium = WebDriver()
+        cls.selenium = PhantomJS()
         cls.selenium.implicitly_wait(3)
         super(IntegrationTests, cls).setUpClass()
 
