@@ -2,11 +2,14 @@ language:
   - "python"
 python:
   - "3.3"
+services:
+  - "postgresql"
 env:
   - "DJANGO_SETTINGS_MODULE=splatterpunk.settings.test DJANGO_SECRET_KEY=sample-secret-key PYTHONPATH=splatterpunk:$PYTHONPATH"
 install:
   - "pip install -r requirements/test.txt"
 before_script:
+  - "createdb splatterpunk --username postgres"
   - "django-admin.py syncdb --noinput"
   - "django-admin.py migrate --noinput"
 script:
