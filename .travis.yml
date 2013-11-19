@@ -1,16 +1,20 @@
 language:
-  - "python"
+- python
 python:
-  - "3.3"
+- '3.3'
 services:
-  - "postgresql"
+- postgresql
 env:
-  - "DJANGO_SETTINGS_MODULE=splatterpunk.settings.test DJANGO_SECRET_KEY=sample-secret-key PYTHONPATH=splatterpunk:$PYTHONPATH"
+- DJANGO_SETTINGS_MODULE=splatterpunk.settings.test DJANGO_SECRET_KEY=sample-secret-key
+  PYTHONPATH=splatterpunk:$PYTHONPATH
 install:
-  - "pip install -r requirements/test.txt"
+- pip install -r requirements/test.txt
 before_script:
-  - "createdb splatterpunk --username postgres"
-  - "django-admin.py syncdb --noinput"
-  - "django-admin.py migrate --noinput"
+- createdb splatterpunk --username postgres
+- django-admin.py syncdb --noinput
+- django-admin.py migrate --noinput
 script:
-  - "django-admin.py test integration_tests"
+- django-admin.py test integration_tests
+deploy:
+  api_key:
+    secure: Q8rLWjC8qN1Svfp5nSh3bt0j5x4SpIFuI36ENaTmY/nWU6XT84BqlxUkdXnWqC4K2hDXO2OXA31cCVAzbk7Suajka9WPxAbt7M+CC1My/vt0+yRPP4RIvnz3bPP1fqknG0kweH6TOWVt1Eu7Qazhr39EuuMIcc25eQwdG8XnPv0=
