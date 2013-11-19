@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 import factory
@@ -15,13 +16,34 @@ logging.getLogger('factory').setLevel(logging.WARNING)
 logging.getLogger('south').setLevel(logging.WARNING)
 
 
+# Test Utils
 def jsonize(qs_or_instance, Serializer, many=False):
     serializer = Serializer(qs_or_instance, many=many)
     return JSONRenderer().render(serializer.data).decode('utf-8')
 
 
+class LoginError(Exception):
+    pass
+
+
+USER_PASS = 'foobar'
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    FACTORY_FOR = get_user_model()
+
+    username = factory.Sequence(lambda n: 'person{0}'.format(n))
+    password = factory.PostGenerationMethodCall('set_password', USER_PASS)
+    email = factory.Sequence(lambda n: 'person{0}@example.com'.format(n))
+    first_name = "Test"
+    last_name = "User"
+
+
 class SheetFactory(factory.django.DjangoModelFactory):
     FACTORY_FOR = Sheet
+
+    user = factory.SubFactory(UserFactory)
+    name = factory.Sequence(lambda n: 'sheet{0}'.format(n))
 
 
 class ApiTest(TestCase):
@@ -31,11 +53,7 @@ class ApiTest(TestCase):
 
         self.assertEqual(Sheet.objects.count(), num_sheets)
 
-        sheets = jsonize(
-            Sheet.objects.all(),
-            SheetSerializer,
-            many=True
-        )
+        sheets = jsonize(Sheet.objects.all(), SheetSerializer, many=True)
 
         r = self.client.get('/sheets/')
 
@@ -44,12 +62,35 @@ class ApiTest(TestCase):
     def test_sheet_instance(self):
         sheet = SheetFactory.create()
 
-        json_sheet = jsonize(
-            sheet,
-            SheetSerializer,
-            many=False
-        )
+        json_sheet = jsonize(sheet, SheetSerializer, many=False)
 
         r = self.client.get('/sheets/{id}/'.format(id=sheet.id))
 
         self.assertJSONEqual(json_sheet, r.content.decode('utf-8'))
+
+    def test_sheet_create(self):
+        user = UserFactory.create()
+        # @todo: this logic should be in a method decorator, passing "user" to
+        # the method.
+        if self.client.login(username=user.username, password=USER_PASS):
+            r = self.client.post('/sheets/', {
+                "name": "Jack",
+            })
+
+            sheet = Sheet.objects.get(user=user, name="Jack")
+            json_sheet = jsonize(sheet, SheetSerializer, many=False)
+
+            self.assertJSONEqual(r.content.decode('utf-8'), json_sheet)
+        else:
+            raise LoginError
+
+    def test_bad_sheet_create(self):
+        r = self.client.post('/sheets/', {
+            'name': "Jack",
+        })
+
+        self.assertEqual(r.status_code, 403)
+
+
+class SheetTest(TestCase):
+    pass
