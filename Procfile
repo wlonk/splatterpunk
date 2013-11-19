@@ -1,1 +1,1 @@
-web: gunicorn splatterpunk.wsgi
+web: newrelic-admin run-program gunicorn splatterpunk.wsgi
