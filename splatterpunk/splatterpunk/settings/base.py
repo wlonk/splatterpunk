@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 VERSION = '0.1.0'
 
-import dj_database_url
-from django.core.exceptions import ImproperlyConfigured
 import os
+from os.path import join, abspath, dirname, normpath
+from django.core.exceptions import ImproperlyConfigured
+import dj_database_url
 
 
 def get_env_variable(var_name):
@@ -24,10 +25,8 @@ def get_env_variable(var_name):
         )
         raise ImproperlyConfigured(error_message)
 
+
 # Build paths inside the project like this: os.path.join(PROJECT_ROOT, ...)
-from os.path import join, abspath, dirname
-
-
 def here(*x):
     return join(abspath(dirname(__file__)), *x)
 
@@ -35,7 +34,7 @@ def here(*x):
 def root(*x):
     return join(abspath(PROJECT_ROOT), *x)
 
-PROJECT_ROOT = here("..", "..", "..")
+PROJECT_ROOT = normpath(here("..", "..", ".."))
 PROJECT_NAME = "splatterpunk"
 SITE_NAME = "Splatterpunk"
 # Quick-start development settings - unsuitable for production
@@ -84,6 +83,7 @@ DJANGO_APPS = (
 THIRD_PARTY_APPS = (
     'south',
     'rest_framework',
+    'pipeline',
 )
 
 LOCAL_APPS = (
@@ -132,6 +132,65 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+########## STATIC FILE CONFIGURATION
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
+STATIC_ROOT = normpath(join(PROJECT_ROOT, 'assets'))
+
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
+# STATIC_URL = '/static/'
+
+# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
+#   #std:setting-STATICFILES_DIRS
+STATICFILES_DIRS = (
+    normpath(join(PROJECT_ROOT, 'static')),
+)
+
+# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
+#   #staticfiles-finders
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
+STATICFILES_STORAGE = '{project}.custom_storages.S3PipelineStorage'.format(
+    project=PROJECT_NAME
+)
+
+AWS_QUERYSTRING_AUTH = False
+AWS_ACCESS_KEY_ID = get_env_variable('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = get_env_variable('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = get_env_variable('AWS_STORAGE_BUCKET_NAME')
+S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+STATIC_URL = S3_URL
+ADMIN_MEDIA_PREFIX = S3_URL + 'admin/'
+
+PIPELINE_CSS = {
+    'all': {
+        'source_filenames': (
+            # 'css/bootstrap.css',
+            # 'css/bootstrap-responsive.css',
+            # 'css/project.css'
+        ),
+        'output_filename': 'css/all.css',
+        'extra_context': {
+            'media': 'screen,projection',
+        },
+    },
+}
+
+PIPELINE_JS = {
+    'all': {
+        'source_filenames': (
+            # 'js/jquery-1.9.1.js',
+            # 'js/bootstrap.js',
+            # 'js/project.js'
+        ),
+        'output_filename': 'js/all.js',
+    }
+}
+########## END STATIC CONFIGURATION
 
 
 # Tests
