@@ -16,5 +16,6 @@ before_script:
 script:
 - django-admin.py test integration_tests
 deploy:
+  provider: heroku
   api_key:
     secure: Q8rLWjC8qN1Svfp5nSh3bt0j5x4SpIFuI36ENaTmY/nWU6XT84BqlxUkdXnWqC4K2hDXO2OXA31cCVAzbk7Suajka9WPxAbt7M+CC1My/vt0+yRPP4RIvnz3bPP1fqknG0kweH6TOWVt1Eu7Qazhr39EuuMIcc25eQwdG8XnPv0=
