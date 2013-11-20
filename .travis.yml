@@ -11,7 +11,7 @@ before_script:
   - createdb splatterpunk --username postgres
   - django-admin.py syncdb --noinput
   - django-admin.py migrate --noinput
-  - django-admin.py collectstatic
+  - django-admin.py collectstatic --noinput
 script:
   - django-admin.py test integration_tests
 deploy:
