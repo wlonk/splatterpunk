@@ -83,6 +83,7 @@ DJANGO_APPS = (
 THIRD_PARTY_APPS = (
     'south',
     'rest_framework',
+    'storages',
     'pipeline',
 )
 
@@ -134,14 +135,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+AWS_QUERYSTRING_AUTH = False
+AWS_ACCESS_KEY_ID = get_env_variable('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = get_env_variable('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = get_env_variable('AWS_STORAGE_BUCKET_NAME')
+S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+STATIC_URL = S3_URL
+ADMIN_MEDIA_PREFIX = S3_URL + 'admin/'
+
+STATICFILES_STORAGE = '{project}.custom_storages.S3PipelineStorage'.format(
+    project=PROJECT_NAME
+)
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = root(PROJECT_NAME, 'assets')
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
-# STATIC_URL = '/static/'
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 #   #std:setting-STATICFILES_DIRS
