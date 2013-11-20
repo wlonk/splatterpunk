@@ -1,21 +1,24 @@
-language:
-- python
+language: python
 python:
-- '3.3'
+  - '3.3'
 services:
-- postgresql
+  - postgresql
 env:
-- DJANGO_SETTINGS_MODULE=splatterpunk.settings.test DJANGO_SECRET_KEY=sample-secret-key
-  PYTHONPATH=splatterpunk:$PYTHONPATH
+  - DJANGO_SETTINGS_MODULE=splatterpunk.settings.test DJANGO_SECRET_KEY=sample-secret-key PYTHONPATH=splatterpunk:$PYTHONPATH
 install:
-- pip install -r requirements/test.txt
+  - pip install -r requirements/test.txt
 before_script:
-- createdb splatterpunk --username postgres
-- django-admin.py syncdb --noinput
-- django-admin.py migrate --noinput
+  - createdb splatterpunk --username postgres
+  - django-admin.py syncdb --noinput
+  - django-admin.py migrate --noinput
 script:
-- django-admin.py test integration_tests
+  - django-admin.py test integration_tests
 deploy:
   provider: heroku
   api_key:
-    secure: Q8rLWjC8qN1Svfp5nSh3bt0j5x4SpIFuI36ENaTmY/nWU6XT84BqlxUkdXnWqC4K2hDXO2OXA31cCVAzbk7Suajka9WPxAbt7M+CC1My/vt0+yRPP4RIvnz3bPP1fqknG0kweH6TOWVt1Eu7Qazhr39EuuMIcc25eQwdG8XnPv0=
+    secure: kwXswJjy0/ExVDMOd8atkLpGuU9HOpiHM+XppPl/OUso01jTBon5UzkE+U4i2S5xXoasybf92fl/QhRE4xmAnOSFIl8LEMiP3mEdNJuLaaBLlI5XaXB8gf+W5wS731BjEuj05Xc3GmwcR/NXRb1EuiOxo1OyjJXWn1RpY7sqkpA=
+  app: splatterpunk
+  on:
+    repo: wlonk/splatterpunk
+  run:
+    - django-admin.py migrate --noinput
