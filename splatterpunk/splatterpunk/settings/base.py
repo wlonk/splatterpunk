@@ -180,6 +180,12 @@ PIPELINE_JS = {
         'output_filename': 'js/all.js',
     }
 }
+
+# Compressing our JS and CSS doesn't gain us that much, compared to GZipping
+# it, and it causes more headaches than not at the moment.
+PIPELINE_CSS_COMPRESSOR = None
+PIPELINE_JS_COMPRESSOR = None
+
 ########## END STATIC CONFIGURATION
 
 
