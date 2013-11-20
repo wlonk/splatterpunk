@@ -93,6 +93,8 @@ LOCAL_APPS = (
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.gzip.GZipMiddleware',
+    'pipeline.middleware.MinifyHTMLMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -128,15 +130,15 @@ USE_L10N = True
 USE_TZ = True
 
 
+########## STATIC FILE CONFIGURATION
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
-########## STATIC FILE CONFIGURATION
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-STATIC_ROOT = normpath(join(PROJECT_ROOT, 'assets'))
+STATIC_ROOT = root(PROJECT_NAME, 'assets')
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 # STATIC_URL = '/static/'
@@ -144,7 +146,7 @@ STATIC_ROOT = normpath(join(PROJECT_ROOT, 'assets'))
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
 #   #std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = (
-    normpath(join(PROJECT_ROOT, 'static')),
+    root(PROJECT_NAME, 'static'),
 )
 
 # See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/
@@ -154,24 +156,12 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
-STATICFILES_STORAGE = '{project}.custom_storages.S3PipelineStorage'.format(
-    project=PROJECT_NAME
-)
-
-AWS_QUERYSTRING_AUTH = False
-AWS_ACCESS_KEY_ID = get_env_variable('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = get_env_variable('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = get_env_variable('AWS_STORAGE_BUCKET_NAME')
-S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-STATIC_URL = S3_URL
-ADMIN_MEDIA_PREFIX = S3_URL + 'admin/'
-
 PIPELINE_CSS = {
     'all': {
         'source_filenames': (
-            # 'css/bootstrap.css',
-            # 'css/bootstrap-responsive.css',
-            # 'css/project.css'
+            'css/bootstrap.css',
+            'css/bootstrap-responsive.css',
+            'css/project.css'
         ),
         'output_filename': 'css/all.css',
         'extra_context': {
@@ -183,9 +173,9 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'all': {
         'source_filenames': (
-            # 'js/jquery-1.9.1.js',
-            # 'js/bootstrap.js',
-            # 'js/project.js'
+            'js/jquery-1.10.2.js',
+            'js/bootstrap.js',
+            'js/project.js'
         ),
         'output_filename': 'js/all.js',
     }
