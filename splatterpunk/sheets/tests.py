@@ -9,6 +9,7 @@ from rest_framework.renderers import JSONRenderer
 
 from .models import Sheet
 from .serializers import SheetSerializer
+from .utils import logged_in
 
 
 # Suppress annoying and irrelevant debug information
@@ -22,21 +23,17 @@ def jsonize(qs_or_instance, Serializer, many=False):
     return JSONRenderer().render(serializer.data).decode('utf-8')
 
 
-class LoginError(Exception):
-    pass
-
-
-USER_PASS = 'foobar'
-
-
 class UserFactory(factory.django.DjangoModelFactory):
     FACTORY_FOR = get_user_model()
 
     username = factory.Sequence(lambda n: 'person{0}'.format(n))
-    password = factory.PostGenerationMethodCall('set_password', USER_PASS)
     email = factory.Sequence(lambda n: 'person{0}@example.com'.format(n))
     first_name = "Test"
     last_name = "User"
+
+    @factory.post_generation
+    def password(self, create, extracted, **kwargs):
+        self.set_password(self.username)
 
 
 class SheetFactory(factory.django.DjangoModelFactory):
@@ -68,21 +65,16 @@ class ApiTest(TestCase):
 
         self.assertJSONEqual(json_sheet, r.content.decode('utf-8'))
 
-    def test_sheet_create(self):
-        user = UserFactory.create()
-        # @todo: this logic should be in a method decorator, passing "user" to
-        # the method.
-        if self.client.login(username=user.username, password=USER_PASS):
-            r = self.client.post('/sheets/', {
-                "name": "Jack",
-            })
+    @logged_in
+    def test_sheet_create(self, user):
+        r = self.client.post('/sheets/', {
+            "name": "Jack",
+        })
 
-            sheet = Sheet.objects.get(user=user, name="Jack")
-            json_sheet = jsonize(sheet, SheetSerializer, many=False)
+        sheet = Sheet.objects.get(user=user, name="Jack")
+        json_sheet = jsonize(sheet, SheetSerializer, many=False)
 
-            self.assertJSONEqual(r.content.decode('utf-8'), json_sheet)
-        else:
-            raise LoginError
+        self.assertJSONEqual(r.content.decode('utf-8'), json_sheet)
 
     def test_bad_sheet_create(self):
         r = self.client.post('/sheets/', {
