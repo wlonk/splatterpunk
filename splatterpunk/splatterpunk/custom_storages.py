@@ -1,5 +1,5 @@
 import urllib
-import urlparse
+from urllib.parse import urlsplit, urlunsplit
 
 from django.contrib.staticfiles.storage import CachedFilesMixin
 
@@ -15,12 +15,12 @@ from storages.backends.s3boto import S3BotoStorage
 class PatchedCachedFilesMixin(CachedFilesMixin):
     def url(self, *a, **kw):
         s = super(PatchedCachedFilesMixin, self).url(*a, **kw)
-        if isinstance(s, unicode):
+        if isinstance(s, str):
             s = s.encode('utf-8', 'ignore')
-        scheme, netloc, path, qs, anchor = urlparse.urlsplit(s)
+        scheme, netloc, path, qs, anchor = urlsplit(s)
         path = urllib.quote(path, '/%')
         qs = urllib.quote_plus(qs, ':&=')
-        return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
+        return urlunsplit((scheme, netloc, path, qs, anchor))
 
 
 class S3PipelineStorage(PipelineMixin, PatchedCachedFilesMixin, S3BotoStorage):
