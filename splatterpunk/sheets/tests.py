@@ -9,7 +9,10 @@ import factory
 from rest_framework.renderers import JSONRenderer
 
 from .models import Sheet
-from .serializers import SheetSerializer
+from .serializers import (
+    SheetSerializer,
+    UserSerializer,
+)
 from .utils import logged_in
 
 
@@ -45,6 +48,24 @@ class SheetFactory(factory.django.DjangoModelFactory):
 
 
 class ApiTest(TestCase):
+    def test_dont_reveal_private_user_data(self):
+        """Serialized users shouldn't show their password hashes.
+        """
+        user = UserFactory()
+        json_user = jsonize(user, UserSerializer)
+        private_fields = (
+            'date_joined',
+            'groups',
+            'is_active',
+            'is_staff',
+            'is_superuser',
+            'last_login',
+            'password',
+            'user_permissions',
+        )
+        for key in private_fields:
+            self.assertNotIn(key, json.loads(json_user).keys())
+
     def test_sheets_list(self):
         """GET /sheets/ should list all sheets in the DB.
         """
