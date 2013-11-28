@@ -8,7 +8,12 @@ import factory
 
 from rest_framework.renderers import JSONRenderer
 
-from .models import Sheet
+from .models import (
+    Sheet,
+    BasicField,
+    PointsField,
+    HealthField,
+)
 from .serializers import (
     SheetSerializer,
     UserSerializer,
@@ -45,6 +50,36 @@ class SheetFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     name = factory.Sequence(lambda n: 'sheet{0}'.format(n))
+
+
+class BasicFieldFactory(factory.django.DjangoModelFactory):
+    FACTORY_FOR = BasicField
+
+    sheet = factory.SubFactory(SheetFactory)
+    key = "Stat"
+    max = 5
+    value = 0
+
+
+class PointsFieldFactory(factory.django.DjangoModelFactory):
+    FACTORY_FOR = PointsField
+
+    sheet = factory.SubFactory(SheetFactory)
+    key = "Willpower"
+    max = 10
+    value = 5
+    points = 0
+
+
+class HealthFieldFactory(factory.django.DjangoModelFactory):
+    FACTORY_FOR = HealthField
+
+    sheet = factory.SubFactory(SheetFactory)
+    key = "Health"
+    max = 7
+    bashing = 0
+    lethal = 0
+    aggravated = 0
 
 
 class ApiTest(TestCase):
@@ -181,4 +216,60 @@ class ApiTest(TestCase):
 
 
 class SheetTest(TestCase):
-    pass
+    def test_health_field(self):
+        """Bashing, lethal and aggravated should never exceed max.
+        """
+        health_field = HealthFieldFactory()
+        max = health_field.max
+
+        health_field.add_bashing(max)
+        self.assertEqual(health_field.bashing, max)
+
+        health_field.add_lethal(max)
+        self.assertEqual(health_field.bashing, 0)
+        self.assertEqual(health_field.lethal, max)
+
+        health_field.add_aggravated(max)
+        self.assertEqual(health_field.bashing, 0)
+        self.assertEqual(health_field.lethal, 0)
+        self.assertEqual(health_field.aggravated, max)
+
+        health_field.add_aggravated(max + 1)
+        self.assertEqual(health_field.aggravated, max)
+
+    def test_points_field(self):
+        """Value shouldn't exceed max, points shouldn't exceed value.
+        """
+        points_field = PointsFieldFactory()
+        max = points_field.max
+        value = points_field.value
+
+        points_field.points = value + 1
+        points_field.save()
+        # @todo: Ugly. Why do we have to do this to refresh field values? I
+        # guess we don't want to thrash the DB on every attribute access, but
+        # still.
+        points_field = PointsField.objects.get(id=points_field.id)
+        self.assertEqual(points_field.points, value)
+
+        points_field.value = max + 1
+        points_field.save()
+        # @todo: Ugly. Why do we have to do this to refresh field values? I
+        # guess we don't want to thrash the DB on every attribute access, but
+        # still.
+        points_field = PointsField.objects.get(id=points_field.id)
+        self.assertEqual(points_field.value, max)
+
+    def test_basic_field(self):
+        """Value shouldn't exceed max.
+        """
+        basic_field = BasicFieldFactory()
+        max = basic_field.max
+
+        basic_field.value = max + 1
+        basic_field.save()
+        # @todo: Ugly. Why do we have to do this to refresh field values? I
+        # guess we don't want to thrash the DB on every attribute access, but
+        # still.
+        basic_field = BasicField.objects.get(id=basic_field.id)
+        self.assertEqual(basic_field.value, max)
