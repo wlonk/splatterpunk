@@ -115,6 +115,8 @@ class ApiTest(TestCase):
 
     @logged_in(UserFactory)
     def test_bad_sheet_update(self, user):
+        """PUT /sheets/:id/ should fail if authenticated as the wrong user.
+        """
         other_user = UserFactory()
         sheet = SheetFactory(user=other_user)
 
@@ -129,6 +131,32 @@ class ApiTest(TestCase):
 
         self.assertEqual(r.status_code, 403)
         self.assertEqual(sheet.name, old_name)
+
+    @logged_in(UserFactory)
+    def test_sheet_delete(self, user):
+        """DELETE /sheets/:id/ should remove the sheet.
+        """
+        sheet = SheetFactory(user=user)
+
+        r = self.client.delete('/sheets/{id}/'.format(id=sheet.id))
+
+        self.assertEqual(r.status_code, 204)
+        self.assertRaises(
+            Sheet.DoesNotExist,
+            lambda: Sheet.objects.get(id=sheet.id)
+        )
+
+    @logged_in(UserFactory)
+    def test_bad_sheet_delete(self, user):
+        """DELETE /sheets/:id/ should fail if authenticated as the wrong user.
+        """
+        other_user = UserFactory()
+        sheet = SheetFactory(user=other_user)
+
+        r = self.client.delete('/sheets/{id}/'.format(id=sheet.id))
+
+        self.assertEqual(r.status_code, 403)
+        self.assertIsInstance(Sheet.objects.get(id=sheet.id), Sheet)
 
 
 class SheetTest(TestCase):

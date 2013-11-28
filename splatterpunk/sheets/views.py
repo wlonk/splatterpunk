@@ -17,7 +17,7 @@ class SheetListView(generics.ListCreateAPIView):
         obj.user = self.request.user
 
 
-class SheetInstanceView(generics.RetrieveUpdateAPIView):
+class SheetInstanceView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Sheet.objects.all()
     serializer_class = SheetSerializer
     permission_classes = (
