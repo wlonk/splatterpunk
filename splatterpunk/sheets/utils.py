@@ -9,8 +9,6 @@ def logged_in(user_factory):
     def logged_in(f):
         @wraps(f)
         def wrapper(self, *args, **kwargs):
-            # # Avoid circular imports:
-            # from .tests import UserFactory
             user = user_factory.create()
             username = user.username
             password = user.username
