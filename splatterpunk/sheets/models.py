@@ -1,10 +1,40 @@
 from django.conf import settings
 from django.db import models
 
+from .constants import (
+    STAT_NAMES,
+    SKILL_NAMES,
+    POINT_STAT_NAMES,
+    DERIVED_STAT_NAMES,
+)
+from .managers import SheetManager
+
 
 class Sheet(models.Model):
+    objects = SheetManager()
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     name = models.CharField(max_length=255, blank=True)
+
+    @property
+    def stat_set(self):
+        return BasicField.objects.filter(sheet=self, key__in=STAT_NAMES)
+
+    @property
+    def skill_set(self):
+        return BasicField.objects.filter(sheet=self, key__in=SKILL_NAMES)
+
+    @property
+    def point_stat_set(self):
+        return PointsField.objects.filter(sheet=self, key__in=POINT_STAT_NAMES)
+
+    @property
+    def misc_stat_set(self):
+        return TextField.objects.filter(sheet=self, key__in=DERIVED_STAT_NAMES)
+
+    @property
+    def supernatural_stat_set(self):
+        return BasicField.objects.filter(sheet=self, key__in=[])
 
 
 class TextField(models.Model):

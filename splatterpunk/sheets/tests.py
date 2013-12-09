@@ -135,11 +135,27 @@ class ApiTest(TestCase):
             "name": "Jack",
         })
 
+        self.assertEqual(r.status_code, 201, msg=r.content)
+
         sheet = Sheet.objects.get(user=user, name="Jack")
         json_sheet = jsonize(sheet, SheetSerializer, many=False)
 
-        self.assertEqual(r.status_code, 201)
         self.assertJSONEqual(r.content.decode('utf-8'), json_sheet)
+
+    @logged_in(UserFactory)
+    def test_sheet_create_bad_data(self, user):
+        """POST /sheets/ with bad data should not create a sheet.
+        """
+        r = self.client.post('/sheets/', {
+            "name": "Jack",
+            "template": "there is no template named this"
+        })
+
+        self.assertEqual(r.status_code, 400)
+        self.assertRaises(
+            Sheet.DoesNotExist,
+            lambda: Sheet.objects.get(user=user, name="Jack")
+        )
 
     def test_bad_sheet_create(self):
         """POST /sheets/ should fail if not authenticated.
@@ -149,6 +165,10 @@ class ApiTest(TestCase):
         })
 
         self.assertEqual(r.status_code, 403)
+        self.assertRaises(
+            Sheet.DoesNotExist,
+            lambda: Sheet.objects.get(name="Jack")
+        )
 
     @logged_in(UserFactory)
     def test_sheet_update(self, user):
@@ -273,3 +293,15 @@ class SheetTest(TestCase):
         # still.
         basic_field = BasicField.objects.get(id=basic_field.id)
         self.assertEqual(basic_field.value, max)
+
+    def test_create_new_mortal_sheet(self):
+        """A blank sheet should start with a pretty big set of stats.
+        """
+        user = UserFactory()
+        sheet = Sheet.objects.with_template('mortal', user)
+
+        self.assertEqual(sheet.stat_set.count(), 9)
+        self.assertEqual(sheet.skill_set.count(), 24)
+        self.assertEqual(sheet.point_stat_set.count(), 3)
+        self.assertEqual(sheet.misc_stat_set.count(), 5)
+        self.assertEqual(sheet.supernatural_stat_set.count(), 0)
