@@ -1,5 +1,4 @@
 # Local development dependencies go here
 -r base.txt
--r test.txt
 Pygments==1.6
-bpython==0.12
+bpython==0.13.1
