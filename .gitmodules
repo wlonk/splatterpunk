@@ -1,0 +1,9 @@
+[submodule "splatterpunk/static/vendor/bootstrap"]
+	path = splatterpunk/static/vendor/bootstrap
+	url = git@github.com:twbs/bootstrap.git
+[submodule "splatterpunk/static/vendor/jquery"]
+	path = splatterpunk/static/vendor/jquery
+	url = git@github.com:jquery/jquery.git
+[submodule "splatterpunk/static/vendor/ember"]
+	path = splatterpunk/static/vendor/ember
+	url = git@github.com:emberjs/ember.js.git

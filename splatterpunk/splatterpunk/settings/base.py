@@ -143,9 +143,7 @@ S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
 STATIC_URL = S3_URL
 ADMIN_MEDIA_PREFIX = S3_URL + 'admin/'
 
-STATICFILES_STORAGE = '{project}.custom_storages.S3PipelineStorage'.format(
-    project=PROJECT_NAME
-)
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
 # See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
 STATIC_ROOT = root(PROJECT_NAME, 'assets')
@@ -166,9 +164,8 @@ STATICFILES_FINDERS = (
 PIPELINE_CSS = {
     'all': {
         'source_filenames': (
-            'css/bootstrap.css',
-            'css/bootstrap-responsive.css',
-            'css/project.css'
+            'vendor/bootstrap/less/bootstrap.less',
+            'less/project.less'
         ),
         'output_filename': 'css/all.css',
         'extra_context': {
@@ -180,18 +177,21 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'all': {
         'source_filenames': (
-            'js/jquery-1.10.2.js',
-            'js/bootstrap.js',
+            'vendor/jquery/jquery.js',
+            'vendor/bootstrap/js/*.js',
+            'vendor/ember/ember.js',
+            'vendor/ember/ember-data.js',
+            'vendor/ember/ember-data-django-rest-adapter.js',
+            'vendor/ember/ember-simple-auth.js',
             'js/project.js'
         ),
         'output_filename': 'js/all.js',
     }
 }
 
-# Compressing our JS and CSS doesn't gain us that much, compared to GZipping
-# it, and it causes more headaches than not at the moment.
-PIPELINE_CSS_COMPRESSOR = None
-PIPELINE_JS_COMPRESSOR = None
+PIPELINE_COMPILERS = (
+  'pipeline.compilers.less.LessCompiler',
+)
 
 ########## END STATIC CONFIGURATION
 

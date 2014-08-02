@@ -8,3 +8,4 @@ futures==2.1.6
 gunicorn==19.1.0
 newrelic==2.22.1.20
 psycopg2==2.5.3
+-e git+https://github.com/AliLozano/django-storages-py3@1dfb55f812ce5cd99db9970aa6cbadf64af8cecd#egg=django_storages-dev
